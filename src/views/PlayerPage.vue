@@ -1,18 +1,26 @@
 <template>
   <div class="sparrow-player">
-    <video id="player" class="player" ref="player"  playsinline></video>
+    <video id="player" class="player" ref="player" playsinline></video>
     <div class="controls">
       <div class="progress-bar">
-        <input @change="updateProgressBar" v-model="progressBarSlider" type="range" class="progress" value="0" max="100" step="0.01">
+        <input
+          @change="updateProgressBar"
+          v-model="progressBarSlider"
+          type="range"
+          class="progress"
+          value="0"
+          max="100"
+          step="0.01"
+        />
       </div>
       <div class="control-buttons">
         <button @click="togglePlay" class="control-item">
           <v-icon>
-            {{ playing ? 'mdi-pause' : 'mdi-play' }}
+            {{ playing ? "mdi-pause" : "mdi-play" }}
           </v-icon>
         </button>
         <span class="control-item current-time">
-          {{videoProgressText}}
+          {{ videoProgressText }}
         </span>
       </div>
     </div>
@@ -20,11 +28,11 @@
 </template>
 
 <script>
-import Hls from 'hls.js';
-import moviesApi from '@/services/moviesApi'
+import Hls from "hls.js";
+import moviesApi from "@/services/moviesApi";
 
 export default {
-  name: 'PlayerPage',
+  name: "PlayerPage",
   data() {
     return {
       hls: null,
@@ -32,8 +40,8 @@ export default {
       currentTime: 0,
       progressBarSlider: 0,
       duration: 0,
-      totalDuration: 0
-    }
+      totalDuration: 0,
+    };
   },
 
   async mounted() {
@@ -41,7 +49,7 @@ export default {
     this.createPlayer();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.hls) {
       this.hls.destroy();
     }
@@ -51,33 +59,45 @@ export default {
     createPlayer() {
       const video = this.$refs.player;
       const id = this.$route.params.id;
-      const videoSrc = `http://localhost:3333/static/${id}/playlist.m3u8`
-      if(Hls.isSupported()){
+      const videoSrc = `http://localhost:3333/static/${id}/playlist.m3u8`;
+      if (Hls.isSupported()) {
         const hls = new Hls();
-        console.log('HLS supported');
+        console.log("HLS supported");
         hls.on(Hls.Events.ERROR, function (event, data) {
           if (data.fatal) {
-            switch(data.type) {
+            switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
-                console.log('fatal network error encountered, try to recover',data, event);
+                console.log(
+                  "fatal network error encountered, try to recover",
+                  data,
+                  event
+                );
                 hls.startLoad();
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
-                console.log('fatal media error encountered, try to recover',data, event);
+                console.log(
+                  "fatal media error encountered, try to recover",
+                  data,
+                  event
+                );
                 hls.recoverMediaError();
                 break;
               default:
-                console.log('fatal error encountered, try to recover', data, event);
+                console.log(
+                  "fatal error encountered, try to recover",
+                  data,
+                  event
+                );
                 hls.startLoad();
                 break;
             }
           }
         });
-        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-          console.log('manifest parsed', video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          console.log("manifest parsed", video);
         });
 
-        video.addEventListener('timeupdate', this.timeUpdateEvent);
+        video.addEventListener("timeupdate", this.timeUpdateEvent);
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
         this.hls = hls;
@@ -89,24 +109,24 @@ export default {
       const response = await moviesApi.getPlayerData(id);
       this.totalDuration = response.totalDuration;
     },
-    updateProgressBar(e){
-      console.log('update progress bar', e.target.value);
+    updateProgressBar(e) {
+      console.log("update progress bar", e.target.value);
       const newTime = (e.target.value / 100) * this.duration;
       this.updateVideoTime(newTime);
     },
-    updateVideoTime(newTime){
-      if(!this.hls) return
+    updateVideoTime(newTime) {
+      if (!this.hls) return;
       this.hls.media.currentTime = newTime;
       this.currentTime = newTime;
     },
-    timeUpdateEvent(){
+    timeUpdateEvent() {
       this.currentTime = this.hls.media.currentTime;
       this.duration = this.hls.media.duration;
       // update progressbar
 
       const videoPositionInPercent = (this.currentTime / this.duration) * 100;
       this.progressBarSlider = videoPositionInPercent;
-      console.log('time update', this.currentTime, this.duration);
+      console.log("time update", this.currentTime, this.duration);
     },
     togglePlay() {
       const video = this.$refs.player;
@@ -117,7 +137,7 @@ export default {
         video.pause();
         this.playing = false;
       }
-    }
+    },
   },
   computed: {
     videoProgressText() {
@@ -127,7 +147,7 @@ export default {
       let seconds = Math.floor(this.currentTime % 60);
 
       // Format hours, minutes, and seconds for current time
-      hours = hours > 0 ? `${hours}:` : '';
+      hours = hours > 0 ? `${hours}:` : "";
       minutes = `${minutes < 10 ? `0${minutes}` : minutes}`;
       seconds = `${seconds < 10 ? `0${seconds}` : seconds}`;
 
@@ -137,16 +157,15 @@ export default {
       let totalSeconds = Math.floor(this.totalDuration % 60);
 
       // Format hours, minutes, and seconds for total duration
-      totalHours = totalHours > 0 ? `${totalHours}:` : '';
+      totalHours = totalHours > 0 ? `${totalHours}:` : "";
       totalMinutes = `${totalMinutes < 10 ? `0${totalMinutes}` : totalMinutes}`;
       totalSeconds = `${totalSeconds < 10 ? `0${totalSeconds}` : totalSeconds}`;
 
       // Compose the formatted string
       return `${hours}${minutes}:${seconds} / ${totalHours}${totalMinutes}:${totalSeconds}`;
-    }
-
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -162,14 +181,13 @@ export default {
   align-items: center;
   background: black;
 }
-.controls{
+.controls {
   position: absolute;
   display: flex;
   flex-direction: column;
   width: 100%;
   bottom: 0;
   left: 0;
-  
 }
 .progress-bar {
   width: 100%;
@@ -191,14 +209,14 @@ export default {
   padding-top: 10px;
   color: white;
 }
-.current-time{
+.current-time {
   margin-left: auto;
 }
-.control-item{
+.control-item {
   padding: 5px;
   border-radius: 8%;
 }
-.control-item:hover{
+.control-item:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 </style>

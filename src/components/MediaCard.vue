@@ -1,28 +1,36 @@
 <template>
-    <v-card :class="`ma-1 movie-card `" height="300px" width="200px" @click="$emit('click')" >
-      <img class="movie-image" :src="cover" :alt="title">
-      <p class="movie-title">{{title}}</p>
-    </v-card>
+  <v-card
+    :class="`ma-1 movie-card `"
+    height="300px"
+    width="200px"
+    @click="$emit('click')"
+  >
+    <img class="movie-image" :src="cover" :alt="title" />
+    <p class="movie-title">{{ title }}</p>
+  </v-card>
 </template>
-
 
 <script>
 export default {
-  name: 'MediaCard',
+  name: "MediaCard",
   props: {
     title: String,
     cover: String,
-    imdbId: String
-  }
-}
+    imdbId: String,
+  },
+};
 </script>
-
 
 <style scoped>
 .movie-card {
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
 }
 
 .movie-image {
@@ -36,7 +44,7 @@ export default {
   opacity: 0.3;
 }
 
-.movie-title{
+.movie-title {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -48,5 +56,4 @@ export default {
   transition: opacity 0.5s ease-in-out;
   z-index: 999;
 }
-
 </style>

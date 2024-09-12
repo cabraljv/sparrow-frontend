@@ -5,9 +5,10 @@
  */
 
 // Plugins
-import vuetify from './vuetify'
-import router from '../router'
+import vuetify from "./vuetify";
+import router from "../router";
+import vuex from "./vuex";
 
 export function registerPlugins(app) {
-  app.use(vuetify).use(router)
+  app.use(vuetify).use(router).use(vuex);
 }
